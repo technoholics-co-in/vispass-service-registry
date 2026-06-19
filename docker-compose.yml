@@ -1,0 +1,37 @@
+services:
+  app:
+    build: .
+    container_name: service-registry-app
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: service-registry-postgres
+    environment:
+      POSTGRES_DB: registry
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - registry_postgres_data:/var/lib/postgresql/data
+      - ./migrations/001_create_registry_tables.sql:/docker-entrypoint-initdb.d/001_create_registry_tables.sql
+      - ./migrations/002_create_service_credentials.sql:/docker-entrypoint-initdb.d/002_create_service_credentials.sql
+      - ./migrations/003_signing_keys_and_audit.sql:/docker-entrypoint-initdb.d/003_signing_keys_and_audit.sql
+
+  redis:
+    image: redis:7-alpine
+    container_name: service-registry-redis
+    ports:
+      - "6380:6379"
+
+volumes:
+  registry_postgres_data:

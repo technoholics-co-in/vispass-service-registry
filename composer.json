@@ -1,0 +1,81 @@
+{
+    "name": "technoholics/service-registry",
+    "description": "Centralized service identity and authorization registry (Slim + Doctrine + Redis)",
+    "type": "project",
+    "require": {
+        "php": ">=8.2",
+        "slim/slim": "^4.12",
+        "slim/psr7": "^1.7",
+        "monolog/monolog": "^3.5",
+        "php-di/php-di": "^7.1",
+        "vlucas/phpdotenv": "^5.5",
+        "technoholics/logger": "dev-main",
+        "technoholics/psr15-middleware": "dev-main",
+        "predis/predis": "^3.2",
+        "ramsey/uuid": "^4.9",
+        "ramsey/uuid-doctrine": "^2.1",
+        "zircote/swagger-php": "^5.4",
+        "technoholics/file-logger": "dev-main",
+        "symfony/validator": "^7.3",
+        "doctrine/orm": "^2.21",
+        "doctrine/dbal": "^3.8",
+        "technoholics/php-core-shared-contracts": "@dev",
+        "technoholics/exception": "^1.2",
+        "psr/simple-cache": "^3.0",
+        "firebase/php-jwt": "^6.11"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../php-core-shared-contracts"
+        },
+        {
+            "type": "path",
+            "url": "../php-psr15-middleware/php-psr15-middleware"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/technoholics-co-in/php-core-logger.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/technoholics-co-in/php-core-exception.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/technoholics-co-in/php-core-library.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/technoholics-co-in/php-psr15-middleware.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/technoholics-co-in/php-core-file-logger.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/technoholics-co-in/php-core-shared-contracts.git"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Technoholics\\ServiceRegistry\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Technoholics\\ServiceRegistry\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.2"
+    },
+    "scripts": {
+        "start": "php -S localhost:8080 -t public",
+        "test": "phpunit",
+        "openapi": "openapi src -o public/openapi.json --exclude DTO,Entities,Services,Repositories,Transformers,Exceptions,Middleware,Shared,OpenApi,Constants"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

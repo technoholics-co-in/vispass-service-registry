@@ -1,0 +1,7 @@
+/vendor/
+/cache/
+/logs/
+/.env
+/.phpunit.cache/
+composer.lock
+/public/openapi.json
