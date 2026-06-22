@@ -22,7 +22,7 @@
         "technoholics/php-core-shared-contracts": "@dev",
         "technoholics/exception": "^1.2",
         "psr/simple-cache": "^3.0",
-        "firebase/php-jwt": "^6.11"
+        "firebase/php-jwt": "^7.0"
     },
     "repositories": [
         {
