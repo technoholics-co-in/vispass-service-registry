@@ -20,7 +20,7 @@
         "doctrine/orm": "^2.21",
         "doctrine/dbal": "^3.8",
         "technoholics/php-core-shared-contracts": "@dev",
-        "technoholics/exception": "^1.2",
+        "technoholics/exception": "dev-main",
         "psr/simple-cache": "^3.0",
         "firebase/php-jwt": "^7.0"
     },
