@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Technoholics\Core\SharedContracts\Env\SecretEnv;
+
 return [
     'settings' => [
         'displayErrorDetails' => ($_ENV['APP_ENV'] ?? 'dev') !== 'prod',
@@ -26,7 +28,7 @@ return [
                 'port' => $_ENV['DB_PORT'] ?? '5432',
                 'dbname' => $_ENV['DB_NAME'] ?? 'registry',
                 'user' => $_ENV['DB_USER'] ?? 'postgres',
-                'password' => $_ENV['DB_PASSWORD'] ?? 'postgres',
+                'password' => SecretEnv::value('DB_PASSWORD', 'postgres'),
                 'charset' => 'UTF8',
             ],
         ],
