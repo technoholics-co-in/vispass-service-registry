@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Setup;
 use Psr\SimpleCache\CacheInterface;
 use Slim\Factory\AppFactory;
-use Symfony\Component\Dotenv\Dotenv;
+use Dotenv\Dotenv;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Technoholics\Logger\FileLogger;
@@ -43,7 +43,7 @@ use Technoholics\ServiceRegistry\TrustRule\Services\ServiceTrustRuleService;
 require __DIR__ . '/../vendor/autoload.php';
 
 if (file_exists(__DIR__ . '/../.env')) {
-    (new Dotenv())->bootEnv(__DIR__ . '/../.env');
+    Dotenv::createImmutable(__DIR__ . '/..')->safeLoad();
 }
 
 $settings = require __DIR__ . '/../config/settings.php';

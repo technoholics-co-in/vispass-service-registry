@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
-use Symfony\Component\Dotenv\Dotenv;
+use Dotenv\Dotenv;
 use Technoholics\Psr15Middleware\Http\Context\Context;
 use Technoholics\ServiceRegistry\Auth\Repositories\AuditLogRepository;
 use Technoholics\ServiceRegistry\Auth\Repositories\SigningKeyRepository;
@@ -15,7 +15,7 @@ use Technoholics\ServiceRegistry\Auth\Services\AuditLogService;
 require __DIR__ . '/../vendor/autoload.php';
 
 if (file_exists(__DIR__ . '/../.env')) {
-    (new Dotenv())->bootEnv(__DIR__ . '/../.env');
+    Dotenv::createImmutable(__DIR__ . '/..')->safeLoad();
 }
 
 $tenantId = null;

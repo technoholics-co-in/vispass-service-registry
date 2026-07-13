@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
-use Symfony\Component\Dotenv\Dotenv;
+use Dotenv\Dotenv;
 use Technoholics\ServiceRegistry\Credential\Entities\ServiceCredentialFields;
 use Technoholics\ServiceRegistry\Credential\Repositories\ServiceCredentialRepository;
 use Technoholics\ServiceRegistry\Service\Repositories\RegisteredServiceRepository;
@@ -13,7 +13,7 @@ use Technoholics\ServiceRegistry\Service\Repositories\RegisteredServiceRepositor
 require __DIR__ . '/../vendor/autoload.php';
 
 if (file_exists(__DIR__ . '/../.env')) {
-    (new Dotenv())->bootEnv(__DIR__ . '/../.env');
+    Dotenv::createImmutable(__DIR__ . '/..')->safeLoad();
 }
 
 $serviceName = null;
