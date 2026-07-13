@@ -19,20 +19,12 @@
         "symfony/validator": "^7.3",
         "doctrine/orm": "^2.21",
         "doctrine/dbal": "^3.8",
-        "technoholics/php-core-shared-contracts": "@dev",
+        "technoholics/php-core-shared-contracts": "dev-main",
         "technoholics/exception": "dev-main",
         "psr/simple-cache": "^3.0",
         "firebase/php-jwt": "^7.0"
     },
     "repositories": [
-        {
-            "type": "path",
-            "url": "../php-core-shared-contracts"
-        },
-        {
-            "type": "path",
-            "url": "../php-psr15-middleware/php-psr15-middleware"
-        },
         {
             "type": "vcs",
             "url": "https://github.com/technoholics-co-in/php-core-logger.git"
