@@ -17,6 +17,7 @@
         "zircote/swagger-php": "^5.4",
         "technoholics/file-logger": "dev-main",
         "symfony/validator": "^7.3",
+        "symfony/cache": "^7.3",
         "doctrine/orm": "^2.21",
         "doctrine/dbal": "^3.8",
         "technoholics/php-core-shared-contracts": "dev-main",
