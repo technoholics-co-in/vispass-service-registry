@@ -41,7 +41,7 @@ const DEFAULT_CALLERS = [
     ],
     'lookup-service' => [
         'type' => ServiceType::API,
-        'scopes' => ['user.read'],
+        'scopes' => ['user.read', 'user.context.read'],
     ],
     'vac-services' => [
         'type' => ServiceType::API,
@@ -149,7 +149,8 @@ foreach ($callerNames as $callerName) {
         }
     }
 
-    if ($trustRuleRepository->findByCallerAndTarget($caller->getId(), $target->getId(), $tenantId) === null) {
+    $trustRule = $trustRuleRepository->findByCallerAndTarget($caller->getId(), $target->getId(), $tenantId);
+    if ($trustRule === null) {
         $trustRuleRepository->create([
             ServiceTrustRuleFields::CALLER_SERVICE_ID => $caller,
             ServiceTrustRuleFields::TARGET_SERVICE_ID => $target,
@@ -161,6 +162,21 @@ foreach ($callerNames as $callerName) {
             $callerName,
             TARGET_SERVICE
         ));
+    } else {
+        $mergedScopes = array_values(array_unique(array_merge(
+            $trustRule->getAllowedScopes(),
+            $profile['scopes']
+        )));
+        if ($mergedScopes !== $trustRule->getAllowedScopes()) {
+            $trustRule->setAllowedScopes($mergedScopes);
+            $em->flush();
+            fwrite(STDOUT, sprintf(
+                "Updated trust rule '%s' -> '%s' scopes: %s\n",
+                $callerName,
+                TARGET_SERVICE,
+                implode(', ', $mergedScopes)
+            ));
+        }
     }
 
     if ($skipCredentials) {
