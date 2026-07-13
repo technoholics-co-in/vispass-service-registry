@@ -145,4 +145,5 @@ if ($generatedSecret) {
     fwrite(STDOUT, "SERVICE_REGISTRY_SECRET={$secret}\n");
 }
 
-fwrite(STDOUT, "\nEnsure a signing key exists: php bin/generate-signing-key.php --tenant-id={$tenantId}\n");
+fwrite(STDOUT, "\nPrefer: php bin/seed-user-service-s2s.php --tenant-id={$tenantId}\n");
+fwrite(STDOUT, "Ensure a signing key exists: php bin/generate-signing-key.php --tenant-id={$tenantId}\n");
