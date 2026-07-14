@@ -43,6 +43,14 @@ const DEFAULT_CALLERS = [
         'type' => ServiceType::API,
         'scopes' => ['user.read', 'user.context.read'],
     ],
+    'location-service' => [
+        'type' => ServiceType::API,
+        'scopes' => ['user.read', 'user.context.read'],
+    ],
+    'document-service' => [
+        'type' => ServiceType::API,
+        'scopes' => ['user.read', 'user.context.read'],
+    ],
     'vac-services' => [
         'type' => ServiceType::API,
         'scopes' => ['user.read', 'user.write'],
@@ -212,9 +220,15 @@ fwrite(STDOUT, "SERVICE_REGISTRY_ISSUER=service-registry\n");
 fwrite(STDOUT, "# SERVICE_REGISTRY_SECRET is optional (only for outbound S2S from user-service)\n");
 
 if ($callerSecrets !== []) {
-    fwrite(STDOUT, "\n--- caller services (set SERVICE_REGISTRY_SECRET) ---\n");
+    fwrite(STDOUT, "\n--- caller services (set SERVICE_REGISTRY_SECRET on the CALLER container) ---\n");
     foreach ($callerSecrets as $callerName => $secret) {
-        fwrite(STDOUT, sprintf("# %s\nSERVICE_NAME=%s\nSERVICE_REGISTRY_SECRET=%s\n\n", $callerName, $callerName, $secret));
+        fwrite(STDOUT, sprintf(
+            "# Container: %s\nSERVICE_NAME=%s\nSERVICE_REGISTRY_SECRET=%s\nUSER_SERVICE_REGISTRY_NAME=%s\n\n",
+            $callerName,
+            $callerName,
+            $secret,
+            TARGET_SERVICE
+        ));
     }
 }
 
