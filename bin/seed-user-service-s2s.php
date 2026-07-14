@@ -197,6 +197,18 @@ foreach ($callerNames as $callerName) {
         continue;
     }
 
+    if ($rotateCredentials && $activeCredentials !== []) {
+        foreach ($activeCredentials as $existingCredential) {
+            $existingCredential->setActive(false);
+        }
+        $em->flush();
+        fwrite(STDOUT, sprintf(
+            "Deactivated %d previous credential(s) for '%s'.\n",
+            count($activeCredentials),
+            $callerName
+        ));
+    }
+
     $secret = bin2hex(random_bytes(32));
     $nextVersion = $credentialRepository->getLatestVersionForService($caller->getId()) + 1;
     $credentialRepository->create([
