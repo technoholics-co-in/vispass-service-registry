@@ -234,8 +234,9 @@ fwrite(STDOUT, "# SERVICE_REGISTRY_SECRET is optional (only for outbound S2S fro
 if ($callerSecrets !== []) {
     fwrite(STDOUT, "\n--- caller services (set SERVICE_REGISTRY_SECRET on the CALLER container) ---\n");
     foreach ($callerSecrets as $callerName => $secret) {
-        fwrite(STDOUT, sprintf(
-            "# Container: %s\nSERVICE_NAME=%s\nSERVICE_REGISTRY_SECRET=%s\nUSER_SERVICE_REGISTRY_NAME=%s\n\n",
+    fwrite(STDOUT, sprintf(
+            "# Container: %s (compose: DOCUMENT_SERVICE_REGISTRY_SECRET if using php-document)\n"
+            . "SERVICE_NAME=%s\nSERVICE_REGISTRY_SECRET=%s\nUSER_SERVICE_REGISTRY_NAME=%s\n\n",
             $callerName,
             $callerName,
             $secret,
