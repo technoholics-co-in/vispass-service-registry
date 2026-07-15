@@ -59,6 +59,7 @@ curl -X POST http://localhost:8080/auth/token \
 - Set `MTLS_REQUIRED=true` when behind a mesh/ingress that sets `X-Forwarded-Client-Cert-Verify: SUCCESS`
 - Consumer services use `Technoholics\Core\SharedContracts\Auth\InternalServiceAuthMiddleware`
 - Optional `MtlsClientVerifyMiddleware` on consuming services
+- JWT validate failures → `Technoholics\Exception\InvalidServiceTokenException` (`SERVICE_TOKEN_INVALID`, 401)
 
 ```php
 use Technoholics\Core\SharedContracts\Auth\InternalServiceAuthMiddleware;
