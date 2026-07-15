@@ -1,0 +1,13 @@
+﻿---
+description: service-registry ownership and consumer bootstrap
+alwaysApply: true
+---
+
+# Service registry service
+
+Owns registration, scopes, trust rules, credentials, `/auth/token`, and JWKS.
+
+- Prefer `bin/seed-user-service-s2s.php` for user-service caller packs.
+- On `--rotate-credentials`, deactivate previous active hashes before inserting the new secret.
+- Consumer wiring docs live under each app's `docs/service-registry.md` (index in `docs/README.md`).
+- Never log plaintext shared secrets outside seed stdout.

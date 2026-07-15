@@ -1,0 +1,29 @@
+﻿---
+description: Slim + Doctrine + PHP 8 conventions for this service
+alwaysApply: true
+---
+
+# Backend conventions (this service)
+
+Follow Technoholics Slim 4 + Doctrine + PHP 8 standards (PSR-12, 4-space indent, max line ~100, single quotes).
+
+## Layout
+
+- Feature folders: `src/<Feature>/{Controllers,Services,Entities,Repositories,DTO,Exceptions,Transformers}/`
+- Routes: `routes/*.php` (or documented app-specific layout)
+- Tests under `tests/` mirroring modules
+- Docs under `docs/`
+
+## Patterns
+
+- Repositories extend `AbstractRepository`; use field constants (no magic strings).
+- Request DTOs: `BaseRequestDTO` + `#[Assert]` / `#[Sanitize]`; search DTOs: `BaseSearchDTO`.
+- Controllers: `validateTenant()` when applicable; `ResponseHelper::success` / error helpers; OpenAPI `#[OA\...]`.
+- Services: `$em->transactional()` for writes; convert to arrays/DTOs before `$em->clear()`.
+- Exceptions: feature `Exceptions/` extending `Technoholics\Exception\*`; services throw, do not return error codes.
+- Logger: project `FileLogger` only — never new up Monolog.
+- Never commit secrets (`.env`); use env vars.
+
+## S2S
+
+See `.cursor/rules/service-registry.mdc` and `docs/service-registry.md`.

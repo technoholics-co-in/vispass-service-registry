@@ -68,9 +68,39 @@ $validator = new ServiceTokenValidator(['base_url' => 'http://service-registry:8
 $app->get('/internal/files')->add(new InternalServiceAuthMiddleware($validator, ['storage.read']));
 ```
 
+## Consumer service docs
+
+Per-service wiring notes (caller vs target):
+
+| Service | Role | Doc |
+|---------|------|-----|
+| user-service | Target (JWKS validation on `/api/internal/*`) | [docs/service-registry.md](../../user-service/docs/service-registry.md) |
+| bff-services | Caller | [docs/service-registry.md](../../bff-services/docs/service-registry.md) |
+| document-service | Caller | [docs/service-registry.md](../../document-service/docs/service-registry.md) |
+| lookup-service | Caller | [docs/service-registry.md](../../lookup-service/docs/service-registry.md) |
+| location-service | Caller | [docs/service-registry.md](../../location-service/docs/service-registry.md) |
+| vac-services | Caller | [docs/service-registry.md](../../vac-services/docs/service-registry.md) |
+| upload-service | Caller | [docs/service-registry.md](../../upload-service/docs/service-registry.md) |
+| visa-services | Caller | [docs/service-registry.md](../../visa-services/docs/service-registry.md) |
+| ingestion-service | Caller | [docs/service-registry.md](../../ingestion-service/docs/service-registry.md) |
+| email-service | Caller | [docs/service-registry.md](../../email-service/docs/service-registry.md) |
+| person-service | Caller | [docs/service-registry.md](../../person-service/docs/service-registry.md) |
+| report-service | Caller | [docs/service-registry.md](../../report-service/docs/service-registry.md) |
+| test-service | Caller (dev) | [docs/service-registry.md](../../test-service/docs/service-registry.md) |
+
+Bootstrap callers → user-service:
+
+```bash
+php bin/seed-user-service-s2s.php --tenant-id=<uuid>
+# or rotate one caller:
+php bin/seed-user-service-s2s.php --tenant-id=<uuid> --callers=<service-name> --rotate-credentials
+```
+
 ## Client library
 
-`Technoholics\Core\SharedContracts\Clients\ServiceRegistry\ServiceRegistryClient`
+`Technoholics\Core\SharedContracts\Clients\ServiceRegistry\ServiceRegistryClient`  
+`Technoholics\Core\SharedContracts\Clients\UserService\UserServiceClientFactory` (callers)  
+`Technoholics\Core\SharedContracts\Auth\ServiceTokenValidator` (targets)
 
 ## Tests
 
