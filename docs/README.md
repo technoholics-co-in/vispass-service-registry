@@ -78,9 +78,9 @@ Per-service wiring notes (caller vs target):
 | user-service | Target (JWKS validation on `/api/internal/*`) | [docs/service-registry.md](../../user-service/docs/service-registry.md) |
 | bff-services | Caller | [docs/service-registry.md](../../bff-services/docs/service-registry.md) |
 | document-service | Caller | [docs/service-registry.md](../../document-service/docs/service-registry.md) |
-| lookup-service | Caller | [docs/service-registry.md](../../lookup-service/docs/service-registry.md) |
-| location-service | Caller | [docs/service-registry.md](../../location-service/docs/service-registry.md) |
-| vac-services | Caller | [docs/service-registry.md](../../vac-services/docs/service-registry.md) |
+| lookup-service | Caller + target (`/api/internal/*`) | [docs/service-registry.md](../../lookup-service/docs/service-registry.md) |
+| location-service | Caller + target (`/api/internal/*`) | [docs/service-registry.md](../../location-service/docs/service-registry.md) |
+| vac-services | Caller + target (`/api/internal/*`) | [docs/service-registry.md](../../vac-services/docs/service-registry.md) |
 | upload-service | Caller | [docs/service-registry.md](../../upload-service/docs/service-registry.md) |
 | visa-services | Caller | [docs/service-registry.md](../../visa-services/docs/service-registry.md) |
 | ingestion-service | Caller | [docs/service-registry.md](../../ingestion-service/docs/service-registry.md) |
@@ -95,6 +95,21 @@ Bootstrap callers → user-service:
 php bin/seed-user-service-s2s.php --tenant-id=<uuid>
 # or rotate one caller:
 php bin/seed-user-service-s2s.php --tenant-id=<uuid> --callers=<service-name> --rotate-credentials
+```
+
+Bootstrap callers → vac-services:
+
+```bash
+php bin/seed-vac-service-s2s.php --tenant-id=<uuid>
+# or rotate one caller:
+php bin/seed-vac-service-s2s.php --tenant-id=<uuid> --callers=visa-services --rotate-credentials
+```
+
+Bootstrap callers → location-service / lookup-service (e.g. vac-services):
+
+```bash
+php bin/seed-location-service-s2s.php --tenant-id=<uuid> --callers=vac-services --skip-credentials
+php bin/seed-lookup-service-s2s.php --tenant-id=<uuid> --callers=vac-services --skip-credentials
 ```
 
 ## Client library

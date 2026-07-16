@@ -30,35 +30,20 @@ if (file_exists(__DIR__ . '/../.env')) {
 }
 
 /**
- * Known callers and minimum scopes for user-service internal APIs.
+ * Known callers and minimum scopes for lookup-service internal APIs.
  *
- * @var array<string, array{type: string, scopes: list<string>}>
+ * @var array<string, array{type: string, scopes: list<string>, compose_secret?: string}>
  */
 const DEFAULT_CALLERS = [
-    'bff-services' => [
-        'type' => ServiceType::BFF,
-        'scopes' => ['user.read', 'user.context.read'],
-    ],
-    'lookup-service' => [
-        'type' => ServiceType::API,
-        'scopes' => ['user.read', 'user.context.read'],
-    ],
-    'location-service' => [
-        'type' => ServiceType::API,
-        'scopes' => ['user.read', 'user.context.read'],
-    ],
-    'document-service' => [
-        'type' => ServiceType::API,
-        'scopes' => ['user.read', 'user.context.read'],
-    ],
     'vac-services' => [
         'type' => ServiceType::API,
-        'scopes' => ['user.read', 'user.context.read', 'user.write'],
+        'scopes' => ['lookup.read'],
+        'compose_secret' => 'VACS_SERVICE_REGISTRY_SECRET',
     ],
 ];
 
-const TARGET_SERVICE = 'user-service';
-const ALL_SCOPES = ['user.read', 'user.context.read', 'user.write'];
+const TARGET_SERVICE = 'lookup-service';
+const ALL_SCOPES = ['lookup.read'];
 
 $tenantId = null;
 $callerNames = null;
@@ -92,7 +77,7 @@ foreach (array_slice($argv, 1) as $arg) {
 }
 
 if ($tenantId === null || $tenantId === '') {
-    fwrite(STDERR, "Usage: php bin/seed-user-service-s2s.php --tenant-id=<uuid> [--callers=bff-services,lookup-service] [--all-scopes] [--skip-credentials] [--rotate-credentials]\n");
+    fwrite(STDERR, "Usage: php bin/seed-lookup-service-s2s.php --tenant-id=<uuid> [--callers=vac-services] [--all-scopes] [--skip-credentials] [--rotate-credentials]\n");
     exit(1);
 }
 
@@ -137,15 +122,25 @@ fwrite(STDOUT, sprintf(
     $tenantId
 ));
 
-$target = ensureService($serviceRepository, $tenantId, TARGET_SERVICE, ServiceType::API);
+$target = ensureLookupService($serviceRepository, $tenantId, TARGET_SERVICE, ServiceType::API);
 fwrite(STDOUT, sprintf("Target service '%s' is registered.\n", TARGET_SERVICE));
+
+foreach (ALL_SCOPES as $targetScope) {
+    if ($scopeRepository->findByServiceIdAndScope($target->getId(), $targetScope) === null) {
+        $scopeRepository->create([
+            ServiceScopeFields::SERVICE_ID => $target,
+            ServiceScopeFields::SCOPE => $targetScope,
+        ]);
+        fwrite(STDOUT, sprintf("Assigned scope '%s' to '%s'.\n", $targetScope, TARGET_SERVICE));
+    }
+}
 
 /** @var array<string, string> $callerSecrets */
 $callerSecrets = [];
 
 foreach ($callerNames as $callerName) {
-    $profile = resolveCallerProfile($callerName, $grantAllScopes);
-    $caller = ensureService($serviceRepository, $tenantId, $callerName, $profile['type']);
+    $profile = resolveLookupCallerProfile($callerName, $grantAllScopes);
+    $caller = ensureLookupService($serviceRepository, $tenantId, $callerName, $profile['type']);
 
     foreach ($profile['scopes'] as $scope) {
         if ($scopeRepository->findByServiceIdAndScope($caller->getId(), $scope) === null) {
@@ -225,51 +220,57 @@ foreach ($callerNames as $callerName) {
     ));
 }
 
-fwrite(STDOUT, "\n--- user-service (php-app) ---\n");
+fwrite(STDOUT, "\n--- lookup-service (php-lookup) ---\n");
+fwrite(STDOUT, "SERVICE_NAME=lookup-service\n");
 fwrite(STDOUT, "SERVICE_REGISTRY_URL=http://service-registry:80\n");
-fwrite(STDOUT, "USER_SERVICE_REGISTRY_NAME=user-service\n");
 fwrite(STDOUT, "SERVICE_REGISTRY_ISSUER=service-registry\n");
-fwrite(STDOUT, "# SERVICE_REGISTRY_SECRET is optional (only for outbound S2S from user-service)\n");
 
 if ($callerSecrets !== []) {
     fwrite(STDOUT, "\n--- caller services (set SERVICE_REGISTRY_SECRET on the CALLER container) ---\n");
     foreach ($callerSecrets as $callerName => $secret) {
-    fwrite(STDOUT, sprintf(
-            "# Container: %s (compose: DOCUMENT_SERVICE_REGISTRY_SECRET if using php-document)\n"
-            . "SERVICE_NAME=%s\nSERVICE_REGISTRY_SECRET=%s\nUSER_SERVICE_REGISTRY_NAME=%s\n\n",
+        $composeKey = DEFAULT_CALLERS[$callerName]['compose_secret'] ?? strtoupper(
+            str_replace('-', '_', $callerName)
+        ) . '_REGISTRY_SECRET';
+        fwrite(STDOUT, sprintf(
+            "# Container: %s (compose: %s)\n"
+            . "SERVICE_NAME=%s\nSERVICE_REGISTRY_SECRET=%s\nLOOKUP_SERVICE_REGISTRY_NAME=%s\n\n",
             $callerName,
+            $composeKey,
             $callerName,
             $secret,
             TARGET_SERVICE
         ));
     }
+} else {
+    fwrite(STDOUT, "\n# Caller vac-services reuses VACS_SERVICE_REGISTRY_SECRET; ensure trust scopes include lookup.read\n");
 }
 
 /**
  * @return array{type: string, scopes: list<string>}
  */
-function resolveCallerProfile(string $callerName, bool $grantAllScopes): array
+function resolveLookupCallerProfile(string $callerName, bool $grantAllScopes): array
 {
     if ($grantAllScopes) {
         return [
-            'type' => $callerName === 'bff-services' ? ServiceType::BFF : ServiceType::API,
+            'type' => ServiceType::API,
             'scopes' => ALL_SCOPES,
         ];
     }
 
     if (isset(DEFAULT_CALLERS[$callerName])) {
-        return DEFAULT_CALLERS[$callerName];
+        return [
+            'type' => DEFAULT_CALLERS[$callerName]['type'],
+            'scopes' => DEFAULT_CALLERS[$callerName]['scopes'],
+        ];
     }
 
     return [
-        'type' => str_ends_with($callerName, '-bff') || $callerName === 'bff-services'
-            ? ServiceType::BFF
-            : ServiceType::API,
-        'scopes' => ['user.read'],
+        'type' => ServiceType::API,
+        'scopes' => ['lookup.read'],
     ];
 }
 
-function ensureService(
+function ensureLookupService(
     RegisteredServiceRepository $repository,
     string $tenantId,
     string $name,
