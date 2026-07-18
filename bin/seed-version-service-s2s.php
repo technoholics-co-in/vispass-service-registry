@@ -30,30 +30,35 @@ if (file_exists(__DIR__ . '/../.env')) {
 }
 
 /**
- * Known callers and minimum scopes for lookup-service internal APIs.
+ * Known callers and minimum scopes for version-service internal APIs.
  *
  * @var array<string, array{type: string, scopes: list<string>, compose_secret?: string}>
  */
 const DEFAULT_CALLERS = [
-    'vac-services' => [
+    'lookup-service' => [
         'type' => ServiceType::API,
-        'scopes' => ['lookup.read'],
-        'compose_secret' => 'VACS_SERVICE_REGISTRY_SECRET',
+        'scopes' => ['version.read', 'version.write'],
+        'compose_secret' => 'LOOKUP_SERVICE_REGISTRY_SECRET',
     ],
-    'upload-service' => [
+    'location-service' => [
         'type' => ServiceType::API,
-        'scopes' => ['lookup.read'],
-        'compose_secret' => 'UPLOAD_SERVICE_REGISTRY_SECRET',
+        'scopes' => ['version.read', 'version.write'],
+        'compose_secret' => 'LOCATION_SERVICE_REGISTRY_SECRET',
     ],
-    'user-service' => [
+    'document-service' => [
         'type' => ServiceType::API,
-        'scopes' => ['lookup.read'],
-        'compose_secret' => 'USER_SERVICE_REGISTRY_SECRET',
+        'scopes' => ['version.read', 'version.write'],
+        'compose_secret' => 'DOCUMENT_SERVICE_REGISTRY_SECRET',
+    ],
+    'ingestion-service' => [
+        'type' => ServiceType::API,
+        'scopes' => ['version.read', 'version.write'],
+        'compose_secret' => 'INGESTION_SERVICE_REGISTRY_SECRET',
     ],
 ];
 
-const TARGET_SERVICE = 'lookup-service';
-const ALL_SCOPES = ['lookup.read'];
+const TARGET_SERVICE = 'version-service';
+const ALL_SCOPES = ['version.read', 'version.write'];
 
 $tenantId = null;
 $callerNames = null;
@@ -87,7 +92,9 @@ foreach (array_slice($argv, 1) as $arg) {
 }
 
 if ($tenantId === null || $tenantId === '') {
-    fwrite(STDERR, "Usage: php bin/seed-lookup-service-s2s.php --tenant-id=<uuid> [--callers=vac-services] [--all-scopes] [--skip-credentials] [--rotate-credentials]\n");
+    fwrite(STDERR, "Usage: php bin/seed-version-service-s2s.php --tenant-id=<uuid>"
+        . " [--callers=lookup-service,location-service] [--all-scopes]"
+        . " [--skip-credentials] [--rotate-credentials]\n");
     exit(1);
 }
 
@@ -132,7 +139,7 @@ fwrite(STDOUT, sprintf(
     $tenantId
 ));
 
-$target = ensureLookupService($serviceRepository, $tenantId, TARGET_SERVICE, ServiceType::API);
+$target = ensureVersionService($serviceRepository, $tenantId, TARGET_SERVICE, ServiceType::API);
 fwrite(STDOUT, sprintf("Target service '%s' is registered.\n", TARGET_SERVICE));
 
 foreach (ALL_SCOPES as $targetScope) {
@@ -149,8 +156,8 @@ foreach (ALL_SCOPES as $targetScope) {
 $callerSecrets = [];
 
 foreach ($callerNames as $callerName) {
-    $profile = resolveLookupCallerProfile($callerName, $grantAllScopes);
-    $caller = ensureLookupService($serviceRepository, $tenantId, $callerName, $profile['type']);
+    $profile = resolveVersionCallerProfile($callerName, $grantAllScopes);
+    $caller = ensureVersionService($serviceRepository, $tenantId, $callerName, $profile['type']);
 
     foreach ($profile['scopes'] as $scope) {
         if ($scopeRepository->findByServiceIdAndScope($caller->getId(), $scope) === null) {
@@ -230,8 +237,8 @@ foreach ($callerNames as $callerName) {
     ));
 }
 
-fwrite(STDOUT, "\n--- lookup-service (php-lookup) ---\n");
-fwrite(STDOUT, "SERVICE_NAME=lookup-service\n");
+fwrite(STDOUT, "\n--- version-service (php-version) ---\n");
+fwrite(STDOUT, "SERVICE_NAME=version-service\n");
 fwrite(STDOUT, "SERVICE_REGISTRY_URL=http://service-registry:80\n");
 fwrite(STDOUT, "SERVICE_REGISTRY_ISSUER=service-registry\n");
 
@@ -243,7 +250,7 @@ if ($callerSecrets !== []) {
         ) . '_REGISTRY_SECRET';
         fwrite(STDOUT, sprintf(
             "# Container: %s (compose: %s)\n"
-            . "SERVICE_NAME=%s\nSERVICE_REGISTRY_SECRET=%s\nLOOKUP_SERVICE_REGISTRY_NAME=%s\n\n",
+            . "SERVICE_NAME=%s\nSERVICE_REGISTRY_SECRET=%s\nVERSION_SERVICE_REGISTRY_NAME=%s\n\n",
             $callerName,
             $composeKey,
             $callerName,
@@ -252,13 +259,14 @@ if ($callerSecrets !== []) {
         ));
     }
 } else {
-    fwrite(STDOUT, "\n# Caller vac-services reuses VACS_SERVICE_REGISTRY_SECRET; ensure trust scopes include lookup.read\n");
+    fwrite(STDOUT, "\n# Callers reuse existing SERVICE_REGISTRY_SECRET;"
+        . " ensure trust scopes include version.read / version.write\n");
 }
 
 /**
  * @return array{type: string, scopes: list<string>}
  */
-function resolveLookupCallerProfile(string $callerName, bool $grantAllScopes): array
+function resolveVersionCallerProfile(string $callerName, bool $grantAllScopes): array
 {
     if ($grantAllScopes) {
         return [
@@ -276,11 +284,11 @@ function resolveLookupCallerProfile(string $callerName, bool $grantAllScopes): a
 
     return [
         'type' => ServiceType::API,
-        'scopes' => ['lookup.read'],
+        'scopes' => ['version.read', 'version.write'],
     ];
 }
 
-function ensureLookupService(
+function ensureVersionService(
     RegisteredServiceRepository $repository,
     string $tenantId,
     string $name,

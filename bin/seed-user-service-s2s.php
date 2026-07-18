@@ -55,6 +55,22 @@ const DEFAULT_CALLERS = [
         'type' => ServiceType::API,
         'scopes' => ['user.read', 'user.context.read', 'user.write'],
     ],
+    'ingestion-service' => [
+        'type' => ServiceType::API,
+        'scopes' => ['user.read', 'user.context.read', 'user.write'],
+    ],
+    'person-service' => [
+        'type' => ServiceType::API,
+        'scopes' => ['user.read'],
+    ],
+    'upload-service' => [
+        'type' => ServiceType::API,
+        'scopes' => ['user.read'],
+    ],
+    'report-service' => [
+        'type' => ServiceType::API,
+        'scopes' => ['user.read'],
+    ],
 ];
 
 const TARGET_SERVICE = 'user-service';

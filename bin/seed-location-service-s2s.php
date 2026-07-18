@@ -40,6 +40,26 @@ const DEFAULT_CALLERS = [
         'scopes' => ['location.read'],
         'compose_secret' => 'VACS_SERVICE_REGISTRY_SECRET',
     ],
+    'user-service' => [
+        'type' => ServiceType::API,
+        'scopes' => ['location.read'],
+        'compose_secret' => 'USER_SERVICE_REGISTRY_SECRET',
+    ],
+    'bff-services' => [
+        'type' => ServiceType::API,
+        'scopes' => ['location.read'],
+        'compose_secret' => 'BFF_SERVICE_REGISTRY_SECRET',
+    ],
+    'visa-services' => [
+        'type' => ServiceType::API,
+        'scopes' => ['location.read'],
+        'compose_secret' => 'VISA_SERVICE_REGISTRY_SECRET',
+    ],
+    'document-service' => [
+        'type' => ServiceType::API,
+        'scopes' => ['location.read'],
+        'compose_secret' => 'DOCUMENT_SERVICE_REGISTRY_SECRET',
+    ],
 ];
 
 const TARGET_SERVICE = 'location-service';

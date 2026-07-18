@@ -16,6 +16,7 @@ use Technoholics\Logger\FileLoggerConfigProvider;
 use Technoholics\Psr15Middleware\Exception\ExceptionLoggingMiddleware;
 use Technoholics\Psr15Middleware\Exception\ExceptionToResponseMiddleware;
 use Technoholics\Psr15Middleware\Http\Context\HeaderExtractorMiddleware;
+use Technoholics\Core\SharedContracts\Http\RejectInvalidJsonBodyMiddleware;
 use Technoholics\Psr15Middleware\Http\SanitizeMiddleware;
 use Technoholics\ServiceRegistry\Auth\Controllers\JwksController;
 use Technoholics\ServiceRegistry\Auth\Controllers\ServiceTokenController;
@@ -243,16 +244,17 @@ $container->set(JwksController::class, static fn ($c): JwksController => new Jwk
     $c->get(FileLogger::class)
 ));
 
-$app->addRoutingMiddleware();
-$app->add(HeaderExtractorMiddleware::class);
-$app->add(new MtlsGateMiddleware());
-$app->addBodyParsingMiddleware();
-$app->add(new SanitizeMiddleware());
-$app->add(new ExceptionLoggingMiddleware($container->get(FileLogger::class)));
 $app->add(new ExceptionToResponseMiddleware(
     $app->getResponseFactory(),
     $settings['settings']['displayErrorDetails']
 ));
+$app->add(new ExceptionLoggingMiddleware($container->get(FileLogger::class)));
+$app->addRoutingMiddleware();
+$app->add(new SanitizeMiddleware());
+$app->addBodyParsingMiddleware();
+$app->add(new RejectInvalidJsonBodyMiddleware());
+$app->add(new MtlsGateMiddleware());
+$app->add(HeaderExtractorMiddleware::class);
 
 (require __DIR__ . '/../routes/health.php')($app);
 (require __DIR__ . '/../routes/services.php')($app);
