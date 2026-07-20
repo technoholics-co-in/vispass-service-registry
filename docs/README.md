@@ -54,6 +54,17 @@ curl -X POST http://localhost:8080/auth/token \
 - `php bin/rotate-signing-key.php` — rotate RS256 keys (audit logged)
 - `audit_logs` table records registration, scope, trust, and token events
 
+### Post-restore sequence sync
+
+If `service_registry` is restored from an SQL dump, sync sequences before issuing new tokens:
+
+```sql
+SELECT setval('audit_logs_id_seq', COALESCE((SELECT MAX(id) FROM audit_logs), 1), true);
+SELECT setval('signing_keys_id_seq', COALESCE((SELECT MAX(id) FROM signing_keys), 1), true);
+```
+
+The helper script `backup/Backup/drop_visa_and_restore_all.sh` already runs this.
+
 ## Phase 5 — mTLS & consumer middleware
 
 - Set `MTLS_REQUIRED=true` when behind a mesh/ingress that sets `X-Forwarded-Client-Cert-Verify: SUCCESS`
