@@ -14,6 +14,10 @@ php bin/generate-signing-key.php
 
 API: `http://localhost:8080`
 
+## Deployment
+
+See [deployment.md](deployment.md) for local/stage deploy steps, migrations, S2S bootstrap, and verification.
+
 ## Phase 1 — Registration & discovery
 
 - `POST /services` — register a service
