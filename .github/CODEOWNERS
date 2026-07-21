@@ -3,3 +3,4 @@
 # main-specific merge restriction (vispass-release) is enforced separately
 # by branch protection, not here — CODEOWNERS can't vary by target branch.
 * @technoholics-co-in/travel-tech-vispass-backend
+# direct push test
